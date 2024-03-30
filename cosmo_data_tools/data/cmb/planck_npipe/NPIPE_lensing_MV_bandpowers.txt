@@ -1,0 +1,13 @@
+# Conservative bandpower estimates from NPIPE PR4 map reconstructions,
+# Taken from Table I of Carron et al.(2206.07773)
+# Units are 1e7*L^2*(L+1)^2/(2pi) CLpp
+#  Lmin     Lave   Lmax      MV_fid    rel_bandpower    rel_uncertainty
+      8     28.1     40    1.40e+00    0.95             0.08
+     41     63.5     84    1.28e+00    1.05             0.05
+     85    106.2    129    9.93e-01    1.01             0.04
+    130    150.4    174    7.62e-01    0.91             0.05
+    175    195.1    219    5.99e-01    0.92             0.06
+    220    240.3    264    4.84e-01    0.94             0.08
+    265    285.8    309    4.01e-01    1.10             0.10
+    310    331.4    354    3.38e-01    1.10             0.12
+    355    377.3    400    2.88e-01    0.86             0.14

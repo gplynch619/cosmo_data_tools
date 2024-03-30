@@ -18,6 +18,10 @@ class CMBPowerSpectrum(CosmoData):
         self._original_units = {k:v for k,v in df.attrs.items() if k!="ell_factor"}
         self.units = {k:v for k,v in df.attrs.items() if k!="ell_factor"}
 
+        if not self._original_units:
+            self._original_units = {"dimensionless": 1.0}
+            self.units = {"dimensionless": 1.0}
+
         self.attrs = df.attrs
         self._to_cl(df) # Power spectra are stored as Cl's, converted to Dl's upon request
 
@@ -62,7 +66,7 @@ class CMBPowerSpectrum(CosmoData):
 
     def print_units(self):
         unit_string = "*".join(list(self.units.keys()))
-        return unit_string
+        print(unit_string)
     
     def unit_factor(self):
         return np.product(list(self.units.values()))
