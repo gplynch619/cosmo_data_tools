@@ -9,14 +9,15 @@ class CMBPowerSpectrum(CosmoData):
 
     def __init__(self, df):
         #self.ell_factor = pd.Series(df["ell"].values*(df["ell"].values+1)/(2*np.pi), index=df["ell"])
-        self.ell_factor = df["ell"].values*(df["ell"].values+1)/(2*np.pi)
         self.lmin=df["ell"].min()
         self.lmax=df["ell"].max()
         try:
             assert "Cl" in df.columns
         except AssertionError as e:
             print("Dataframe does not contain a Dl or Cl column. Unexpected behavior may occur.")
-        self.original_units = {k:v for k,v in df.attrs.items() if k!="ell_factor"}
+        self._original_units = {k:v for k,v in df.attrs.items() if k!="ell_factor"}
+        self.units = {k:v for k,v in df.attrs.items() if k!="ell_factor"}
+
         self.attrs = df.attrs
         self._to_cl(df) # Power spectra are stored as Cl's, converted to Dl's upon request
 
@@ -30,49 +31,65 @@ class CMBPowerSpectrum(CosmoData):
         """
         Converts dataframe to Cl's (does nothing if already in Cl form), same units
         """
-        if "ell_factor" in df.attrs.keys():
-            df["Cl"] /= self.ell_factor
-            if "Cl_err" in df.columns:
-                df["Cl_err"] /= self.ell_factor
-            del df.attrs["ell_factor"]
+        for name,value in df.attrs.items():
+            if name=="ell_factor":
+                df["Cl"] /= value(df["ell"])
+                if "Cl_err" in df.columns:
+                    df["Cl_err"] /= value(df["ell"])
+            else:
+                df["Cl"] /= value
+                if "Cl_err" in df.columns:
+                    df["Cl_err"] /= value
+            #del df.attrs["ell_factor"]
 
     def Cl(self, l=None):
-        return self.get_y(l)        
+        return self.unit_factor()*self.get_y(l)        
 
     def Dl(self, l=None):
         if l is None:
-            return self.get_y()*self.ell_factor
+            return self.unit_factor()*self.get_y()*(self.ell()*(self.ell()+1))/(2*np.pi)
         else:
-            return self.get_y(l)*(l*(l+1)/(2*np.pi))    
+            return self.unit_factor()*self.get_y(l)*(l*(l+1)/(2*np.pi))    
 
     def Dl_err(self):
-        return self.get_yerr()*self.ell_factor
+        return self.unit_factor()*self.get_yerr()*(self.ell()*(self.ell()+1))/(2*np.pi)
 
     def Cl_err(self):
-        return self.get_yerr()
+        return self.unit_factor()*self.get_yerr()
 
     def ell(self):
         return self.data["x"].to_numpy()
 
-    def units(self):
-        unit_string = "*".join(list(self.attrs.keys()))
+    def print_units(self):
+        unit_string = "*".join(list(self.units.keys()))
         return unit_string
     
-    def _to_units(self, target_units):
-        if target_units=="dimensionless":
-            conversion_factor = 1./np.product(list(self.attrs.values()))
-            self.attrs={}
-        else:
-            conversion_factor = np.product(list(target_units.values()))/np.product(list(self.attrs.values()))
-            self.attrs = target_units
+    def unit_factor(self):
+        return np.product(list(self.units.values()))
 
-        self.data["y"]*=conversion_factor
-        if "yerr" in self.data.columns:
-            self.data["yerr"]*=conversion_factor
+    def to_units(self, target_units):
+        if target_units=="dimensionless":
+            self.units={"dimensionless": 1.0}
+        else:
+            self.units = target_units
 
     def bibtex(self):
         pass
 
+class CMBLensingSpectrum(CMBPowerSpectrum):
+
+    def Dl(self, l=None):
+        if l is None:
+            return self.unit_factor()*self.get_y()*(self.ell()*(self.ell()+1))**2/(2*np.pi)
+        else:
+            return self.unit_factor()*self.get_y(l)*((l*(l+1))**2/(2*np.pi))    
+
+    def Dl_err(self):
+        return self.unit_factor()*self.get_yerr()*(self.ell()*(self.ell()+1))**2/(2*np.pi)
+    
+    def L(self):
+        return self.ell()
+    
 class Binner():
 
     def __init__(self, bin_edges):
@@ -101,6 +118,7 @@ class Binner():
             self.uniform_bin_weights_matrix()
 
         df = data.data.copy(deep=True)
+        print(data.attrs)
         df = df[df["x"].between(self.lmin, self.lmax)]
         ell_b = np.matmul(self.bm, df["x"])
         Cl_b = np.matmul(self.bm, df["y"])
@@ -110,8 +128,10 @@ class Binner():
              "Cl": Cl_b,
              "Cl_err": np.sqrt(var_b)}
         df = pd.DataFrame(d)
-        df.attrs={k:v for k,v in data.attrs.items() if k!="ell_factor"}
-        return CMBPowerSpectrum(df)
+        df.attrs={"dimensionless": 1.0}
+        binned = CMBPowerSpectrum(df)
+        binned.to_units(data._original_units)
+        return binned
 
     def planck_bin_weights_matrix(self):
         lrange = np.arange(self.lmin, self.lmax)

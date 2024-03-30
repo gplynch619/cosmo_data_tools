@@ -4,21 +4,20 @@ import numpy as np
 import pandas as pd
 from cosmo_data_tools import _ROOT
 
-class SPT3G_2018_TTEE(CMBPowerSpectrum):
+class SPT3G_2018_TEEE(CMBPowerSpectrum):
 
     data_path = os.path.join(_ROOT, "data/cmb/spt3g/bp_for_plotting_v3.txt")
 
     def __init__(self):
-        if not os.path.isfile(SPT3G_2018_TTEE.data_path):
-            #os.system('wget -O {} "https://pole.uchicago.edu/public/data/dutcher21/bp_for_plotting_v3.txt"'.format(SPT3G_2018_TTEE.data_path))
-            os.system('curl "https://pole.uchicago.edu/public/data/dutcher21/bp_for_plotting_v3.txt" --create-dirs -o {}'.format(SPT3G_2018_TTEE.data_path))
+        if not os.path.isfile(SPT3G_2018_TEEE.data_path):
+            os.system('curl "https://pole.uchicago.edu/public/data/dutcher21/bp_for_plotting_v3.txt" --create-dirs -o {}'.format(SPT3G_2018_TEEE.data_path))
 
-        self.path = SPT3G_2018_TTEE.data_path
+        self.path = SPT3G_2018_TEEE.data_path
 
         d = self.get_data()
         df = pd.DataFrame(d)
-        df.attrs = {"ell_factor": d["ell"]*(d["ell"]+1)/(2*np.pi),
-                    "uK2": SPT3G_2018_TTEE.Tcmb**2}
+        df.attrs = {"ell_factor": lambda l: l*(l+1)/(2*np.pi),
+                    "uK2": SPT3G_2018_TEEE.Tcmb**2}
         super().__init__(df)
 
     def get_data(self):
@@ -43,7 +42,7 @@ class SPT3G_2018_TTEE(CMBPowerSpectrum):
         '''
         print(bibtex_string)
 
-class spt3g_2018_TE(SPT3G_2018_TTEE):
+class spt3g_2018_TE(SPT3G_2018_TEEE):
 
     def get_data(self):
         raw_data= np.loadtxt(self.path)
@@ -53,7 +52,7 @@ class spt3g_2018_TE(SPT3G_2018_TTEE):
              }
         return d
     
-class spt3g_2018_EE(SPT3G_2018_TTEE):
+class spt3g_2018_EE(SPT3G_2018_TEEE):
 
     def get_data(self):
         raw_data= np.loadtxt(self.path)

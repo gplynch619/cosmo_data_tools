@@ -15,7 +15,7 @@ class Planck2018(CMBPowerSpectrum):
              "Cl_err": (raw_data[:,2]+raw_data[:,3])/2 #only support for symmetric errors right now
             }
         df = pd.DataFrame(d)
-        df.attrs = {"ell_factor": d["ell"]*(d["ell"]+1)/(2*np.pi),
+        df.attrs = {"ell_factor": lambda l: l*(l+1)/(2*np.pi),
                     "uK2": Planck2018.Tcmb**2}
         super().__init__(df)
 
@@ -44,7 +44,7 @@ class planck_2018_highl_TT(Planck2018):
 
     def __init__(self):
         if not os.path.isfile(planck_2018_highl_TT.data_path):
-            os.system('wget -O {} "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_PowerSpect_CMB-TT-binned_R3.01.txt"'.format(planck_2018_highl_TT.data_path))
+            os.system('curl "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_PowerSpect_CMB-TT-binned_R3.01.txt" --create-dirs -o {}'.format(planck_2018_highl_TT.data_path))
         super().__init__(planck_2018_highl_TT.data_path)
 
 class planck_2018_highl_TE(Planck2018):
@@ -53,7 +53,7 @@ class planck_2018_highl_TE(Planck2018):
 
     def __init__(self):
         if not os.path.isfile(planck_2018_highl_TE.data_path):
-            os.system('wget -O {} "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_PowerSpect_CMB-TE-binned_R3.02.txt"'.format(planck_2018_highl_TE.data_path))
+            os.system('curl "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_PowerSpect_CMB-TE-binned_R3.02.txt" --create-dirs -o {}'.format(planck_2018_highl_TE.data_path))
         super().__init__(planck_2018_highl_TE.data_path)
 
 class planck_2018_highl_EE(Planck2018):
@@ -62,7 +62,7 @@ class planck_2018_highl_EE(Planck2018):
 
     def __init__(self):
         if not os.path.isfile(planck_2018_highl_EE.data_path):
-            os.system('wget -O {} "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_PowerSpect_CMB-EE-binned_R3.02.txt"'.format(planck_2018_highl_EE.data_path))
+            os.system('curl "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_PowerSpect_CMB-EE-binned_R3.02.txt" --create-dirs -o {}'.format(planck_2018_highl_EE.data_path))
         super().__init__(planck_2018_highl_EE.data_path)
 
 class planck_2018_highl_TT_unbinned(Planck2018):
@@ -71,7 +71,7 @@ class planck_2018_highl_TT_unbinned(Planck2018):
 
     def __init__(self):
         if not os.path.isfile(planck_2018_highl_TT_unbinned.data_path):
-            os.system('wget -O {} "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_PowerSpect_CMB-TT-full_R3.01.txt"'.format(planck_2018_highl_TT_unbinned.data_path))
+            os.system('curl "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_PowerSpect_CMB-TT-full_R3.01.txt" --create-dirs -o {}'.format(planck_2018_highl_TT_unbinned.data_path))
         super().__init__(planck_2018_highl_TT_unbinned.data_path)
 
 class planck_2018_highl_TE_unbinned(Planck2018):
@@ -80,7 +80,7 @@ class planck_2018_highl_TE_unbinned(Planck2018):
 
     def __init__(self):
         if not os.path.isfile(planck_2018_highl_TE_unbinned.data_path):
-            os.system('wget -O {} "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_PowerSpect_CMB-TE-full_R3.01.txt"'.format(planck_2018_highl_TE_unbinned.data_path))
+            os.system('curl "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_PowerSpect_CMB-TE-full_R3.01.txt" --create-dirs -o {}'.format(planck_2018_highl_TE_unbinned.data_path))
         super().__init__(planck_2018_highl_TE_unbinned.data_path)
 
 class planck_2018_highl_EE_unbinned(Planck2018):
@@ -89,5 +89,5 @@ class planck_2018_highl_EE_unbinned(Planck2018):
 
     def __init__(self):
         if not os.path.isfile(planck_2018_highl_EE_unbinned.data_path):
-            os.system('wget -O {} "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_PowerSpect_CMB-EE-full_R3.01.txt"'.format(planck_2018_highl_EE_unbinned.data_path))
+            os.system('curl "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_PowerSpect_CMB-EE-full_R3.01.txt"'.format(planck_2018_highl_EE_unbinned.data_path))
         super().__init__(planck_2018_highl_EE_unbinned.data_path)

@@ -10,7 +10,9 @@ class SPT3G_2018_TTTEEE(CMBPowerSpectrum):
 
     def __init__(self):
         if not os.path.isfile(SPT3G_2018_TTTEEE.data_path):
-            os.system('wget -O {} "https://lambda.gsfc.nasa.gov/data/suborbital/SPT/spt_3g/SPT3G_2018_TTTEEE_MV_bdp.txt"'.format(SPT3G_2018_TTTEEE.data_path))
+            #os.system('wget -O {} "https://lambda.gsfc.nasa.gov/data/suborbital/SPT/spt_3g/SPT3G_2018_TTTEEE_MV_bdp.txt"'.format(SPT3G_2018_TTTEEE.data_path))
+            os.system('curl "https://lambda.gsfc.nasa.gov/data/suborbital/SPT/spt_3g/SPT3G_2018_TTTEEE_MV_bdp.txt" --create-dirs -o {}'.format(SPT3G_2018_TTTEEE.data_path))
+
         self.path = SPT3G_2018_TTTEEE.data_path
 
         d = self.get_data()
