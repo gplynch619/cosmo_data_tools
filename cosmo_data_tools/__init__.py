@@ -1,2 +1,2 @@
 import os
-_ROOT = os.getcwd()
+_ROOT = os.path.dirname(__file__)

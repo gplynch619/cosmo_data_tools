@@ -17,7 +17,7 @@ class SPT3G_2018_TTTEEE(CMBPowerSpectrum):
 
         d = self.get_data()
         df = pd.DataFrame(d)
-        df.attrs = {"ell_factor": d["ell"]*(d["ell"]+1)/(2*np.pi),
+        df.attrs = {"ell_factor": lambda l: l*(l+1)/(2*np.pi),
                     "uK2": SPT3G_2018_TTTEEE.Tcmb**2}
         super().__init__(df)
 

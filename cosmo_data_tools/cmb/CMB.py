@@ -76,7 +76,15 @@ class CMBPowerSpectrum(CosmoData):
             self.units={"dimensionless": 1.0}
         else:
             self.units = target_units
-
+    
+    @property
+    def plot_fmt(self):
+        return self._plot_fmt
+    
+    @plot_fmt.setter
+    def plot_fmt(self, fmt):
+        self._plot_fmt = fmt
+    
     def bibtex(self):
         pass
 
@@ -124,6 +132,8 @@ class Binner():
         df = data.data.copy(deep=True)
         print(data.attrs)
         df = df[df["x"].between(self.lmin, self.lmax)]
+        print(df["x"])
+        print(self.bm)
         ell_b = np.matmul(self.bm, df["x"])
         Cl_b = np.matmul(self.bm, df["y"])
         var = df["yerr"]**2
@@ -138,7 +148,7 @@ class Binner():
         return binned
 
     def planck_bin_weights_matrix(self):
-        lrange = np.arange(self.lmin, self.lmax)
+        lrange = np.arange(self.lmin, self.lmax+1)
         self.bm = np.zeros((len(self.bins), len(lrange)))
         for i,bin in enumerate(self.bins):
             offset = bin[0]-self.lmin
