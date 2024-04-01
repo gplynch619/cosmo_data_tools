@@ -69,8 +69,8 @@ class spt3g_2018_EE(SPT3G_2018_TTTEEE):
 
     def get_data(self):
         raw_data= np.loadtxt(self.path)
-        d = {"ell": raw_data[8:,8],
-             "Cl": raw_data[8:,9],
-             "Cl_err":raw_data[8:,10],
+        d = {"ell": raw_data[:,8],
+             "Cl": raw_data[:,9],
+             "Cl_err":raw_data[:,10],
              }
         return d

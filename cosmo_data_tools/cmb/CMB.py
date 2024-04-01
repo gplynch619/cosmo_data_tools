@@ -22,6 +22,8 @@ class CMBPowerSpectrum(CosmoData):
             self._original_units = {"dimensionless": 1.0}
             self.units = {"dimensionless": 1.0}
 
+        self._plot_fmt = {}
+
         self.attrs = df.attrs
         self._to_cl(df) # Power spectra are stored as Cl's, converted to Dl's upon request
 
@@ -63,6 +65,17 @@ class CMBPowerSpectrum(CosmoData):
 
     def ell(self):
         return self.data["x"].to_numpy()
+
+    def subset(self, start, stop):
+        d={}
+        sub_data= self.data[self.data["x"].between(start, stop)]
+        d["ell"] = sub_data["x"]
+        d["Cl"] = self.unit_factor()*sub_data["y"]
+        if "yerr" in self.data.columns:
+            d["Cl_err"] = self.unit_factor()*sub_data["yerr"]
+        df = pd.DataFrame(d)
+        df.attrs = self.units
+        return CMBPowerSpectrum(df)
 
     def print_units(self):
         unit_string = "*".join(list(self.units.keys()))
@@ -129,11 +142,10 @@ class Binner():
         elif weights=="uniform":
             self.uniform_bin_weights_matrix()
 
-        df = data.data.copy(deep=True)
-        print(data.attrs)
-        df = df[df["x"].between(self.lmin, self.lmax)]
-        print(df["x"])
-        print(self.bm)
+
+        sub_data = data.subset(self.lmin, self.lmax-1) # -1 to account for the fact that the right bin edge is not included
+        df = sub_data.data.copy(deep=True)
+
         ell_b = np.matmul(self.bm, df["x"])
         Cl_b = np.matmul(self.bm, df["y"])
         var = df["yerr"]**2
@@ -144,12 +156,12 @@ class Binner():
         df = pd.DataFrame(d)
         df.attrs={"dimensionless": 1.0}
         binned = CMBPowerSpectrum(df)
-        binned.to_units(data._original_units)
+        binned.to_units(sub_data._original_units)
         return binned
 
     def planck_bin_weights_matrix(self):
-        lrange = np.arange(self.lmin, self.lmax+1)
-        self.bm = np.zeros((len(self.bins), len(lrange)))
+        num_unbinned = self.lmax-self.lmin
+        self.bm = np.zeros((len(self.bins), num_unbinned))
         for i,bin in enumerate(self.bins):
             offset = bin[0]-self.lmin
             ells_in_bin = np.arange(bin[0], bin[-1])
@@ -158,8 +170,8 @@ class Binner():
                 self.bm[i,offset+j] = ell*(ell+1)/bin_weight_norm
 
     def uniform_bin_weights_matrix(self):
-        lrange = np.arange(self.lmin, self.lmax)
-        self.bm = np.zeros((len(self.bins), len(lrange)))
+        num_unbinned = self.lmax-self.lmin
+        self.bm = np.zeros((len(self.bins), num_unbinned))
         for i,bin in enumerate(self.bins):
             offset = bin[0]-self.lmin
             ells_in_bin = np.arange(bin[0], bin[-1])
